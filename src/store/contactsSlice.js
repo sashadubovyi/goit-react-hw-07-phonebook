@@ -1,33 +1,56 @@
 import { createSlice } from '@reduxjs/toolkit';
-import Notiflix from 'notiflix';
+import { fetchContact, addContact, deleteContact } from './operations';
 
 const contactsSlice = createSlice({
   name: 'contacts',
   initialState: {
     users: [],
+    isLoading: false,
+    error: null,
   },
-
-  reducers: {
-    addContact(state, { payload }) {
-      if (
-        state.users.find(
-          contact => payload.name.toLowerCase() === contact.name.toLowerCase()
-        )
-      ) {
-        Notiflix.Notify.failure(
-          `You have already created a contact with the name ${payload.name}`
+  reducers: {},
+  extraReducers: builder => {
+    builder
+      .addCase(fetchContact.pending, state => {
+        state.isLoading = true;
+      })
+      .addCase(fetchContact.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.error = null;
+        state.users = action.payload;
+      })
+      .addCase(fetchContact.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload ? action.payload : null;
+      })
+      .addCase(addContact.pending, state => {
+        state.isLoading = true;
+      })
+      .addCase(addContact.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.error = null;
+        state.users.push(action.payload);
+      })
+      .addCase(addContact.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload ? action.payload : null;
+      })
+      .addCase(deleteContact.pending, state => {
+        state.isLoading = true;
+      })
+      .addCase(deleteContact.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.error = null;
+        const index = state.users.findIndex(
+          contact => contact.id === action.payload.id
         );
-        return state;
-      }
-      state.users.push(payload);
-    },
-    removeContact(state, { payload }) {
-      return {
-        users: state.users.filter(contact => contact.id !== payload),
-      };
-    },
+        state.users.splice(index, 1);
+      })
+      .addCase(deleteContact.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload ? action.payload : null;
+      });
   },
 });
 
 export const contactsReducer = contactsSlice.reducer;
-export const { addContact, removeContact } = contactsSlice.actions;

@@ -1,26 +1,35 @@
-const { nanoid } = require('nanoid');
-const { useState } = require('react');
-const { useDispatch } = require('react-redux');
-const { addContact } = require('store/contactsSlice');
-const {
+import Notiflix from 'notiflix';
+import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import {
   PhoneBookContainer,
   Title,
   FormContacts,
   InputName,
   ButtonSubmit,
-} = require('./Phonebook.styled');
+} from './Phonebook.styled';
+import { addContact } from 'store/operations';
 
 function PhoneBook() {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
 
   const dispatch = useDispatch();
+  const contacts = useSelector(state => state.contacts.users);
+  const error = useSelector(state => state.contacts.error);
 
   const onSubmitForm = evt => {
     evt.preventDefault();
 
-    dispatch(addContact({ name, number, id: nanoid() }));
-    resetInputs();
+    const newName = contacts.filter(
+      contact => contact.name.toLowerCase() === name.toLowerCase()
+    );
+    if (newName.length === 0) {
+      dispatch(addContact({ name, number }));
+      resetInputs();
+    } else {
+      Notiflix.Notify.info(`You already have a contact with the name ${name}`);
+    }
   };
 
   const resetInputs = () => {
@@ -65,6 +74,7 @@ function PhoneBook() {
           required
         />
         <ButtonSubmit>Add contact</ButtonSubmit>
+        {error && <p>Something went wrong!</p>}
       </FormContacts>
     </PhoneBookContainer>
   );

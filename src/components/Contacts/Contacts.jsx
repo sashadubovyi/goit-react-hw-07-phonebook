@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   ButtonDelete,
@@ -8,12 +8,18 @@ import {
   ContactsItem,
   Title,
 } from './Contacts.styled';
-import { removeContact } from 'store/contactsSlice';
 import Filter from 'components/Filter/Filter';
+import { deleteContact, fetchContact } from 'store/operations';
 
 function Contacts() {
   const dispatch = useDispatch();
   const filter = useSelector(state => state.filter);
+  const loader = useSelector(state => state.contacts.isLoading);
+
+  useEffect(() => {
+    dispatch(fetchContact());
+  }, [dispatch]);
+
   const contacts = useSelector(state => state.contacts.users);
   const filterContacts = contacts.filter(contact =>
     contact.name.toLowerCase().includes(filter.toLowerCase())
@@ -31,16 +37,21 @@ function Contacts() {
             </ContactName>
             <ContactPhone
               key={`${contact.id}-phone`}
-              href={`tel:${contact.number}`}
+              href={`tel:${contact.phone}`}
             >
-              {contact.number}
+              {contact.phone}
             </ContactPhone>
-            <ButtonDelete onClick={() => dispatch(removeContact(contact?.id))}>
+            <ButtonDelete onClick={() => dispatch(deleteContact(contact?.id))}>
               Delete
             </ButtonDelete>
           </ContactsItem>
         ))}
       </div>
+      {loader && (
+        <div>
+          <p>Loading...</p>
+        </div>
+      )}
     </ContactsContainer>
   );
 }
