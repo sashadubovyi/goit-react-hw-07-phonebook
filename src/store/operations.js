@@ -1,42 +1,48 @@
-// //https://64870880beba6297278fb868.mockapi.io/contacts/
-
 import axios from 'axios';
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import { loginUserAPI, registerUserAPI } from 'services/contactsAPI';
 
-axios.defaults.baseURL = 'https://64870880beba6297278fb868.mockapi.io';
-
-export const fetchContact = createAsyncThunk(
-  'contacts/fetchAll',
-  async (_, thunkAPI) => {
-    try {
-      const response = await axios.get('/contacts');
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
-    }
-  }
-);
+export const fetchContacts = createAsyncThunk('contacts/fetchAll', async () => {
+  const { data } = await axios.get('/contacts');
+  return data;
+});
 
 export const addContact = createAsyncThunk(
   'contacts/addContact',
-  async ({ name, number }, thunkAPI) => {
-    try {
-      const response = await axios.post('/contacts', { name, phone: number });
-      return response.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
-    }
+  async contact => {
+    const { data } = await axios.post('/contacts', contact);
+    return data;
   }
 );
 
 export const deleteContact = createAsyncThunk(
   'contacts/deleteContact',
-  async (id, thunkAPI) => {
+  async id => {
+    const { data } = await axios.delete(`/contacts/${id}`);
+    return data;
+  }
+);
+
+export const registerUser = createAsyncThunk(
+  'auth/registrateUser',
+  async (userData, { rejectWithValue }) => {
     try {
-      const response = await axios.delete(`/contacts/${id}`);
-      return response.data;
+      const data = await registerUserAPI(userData);
+      return data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const loginUser = createAsyncThunk(
+  'auth/loginUser',
+  async (userData, { rejectWithValue }) => {
+    try {
+      const data = await loginUserAPI(userData);
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message);
     }
   }
 );

@@ -9,7 +9,7 @@ import {
   Title,
 } from './Contacts.styled';
 import Filter from 'components/Filter/Filter';
-import { deleteContact, fetchContact } from 'store/operations';
+import { deleteContact, fetchContacts } from 'store/operations';
 
 function Contacts() {
   const dispatch = useDispatch();
@@ -17,7 +17,7 @@ function Contacts() {
   const loader = useSelector(state => state.contacts.isLoading);
 
   useEffect(() => {
-    dispatch(fetchContact());
+    dispatch(fetchContacts());
   }, [dispatch]);
 
   const contacts = useSelector(state => state.contacts.users);
@@ -31,15 +31,10 @@ function Contacts() {
       <Title>Contacts</Title>
       <div>
         {filterContacts.map(contact => (
-          <ContactsItem key={contact.id}>
-            <ContactName key={`${contact.id}-name`}>
-              {contact.name}:
-            </ContactName>
-            <ContactPhone
-              key={`${contact.id}-phone`}
-              href={`tel:${contact.phone}`}
-            >
-              {contact.phone}
+          <ContactsItem key={contact?.id}>
+            <ContactName key={`${contact?.id}`}>{contact?.name}:</ContactName>
+            <ContactPhone key={`${contact?.id}`} href={`tel:${contact?.phone}`}>
+              {contact?.phone}
             </ContactPhone>
             <ButtonDelete onClick={() => dispatch(deleteContact(contact?.id))}>
               Delete
